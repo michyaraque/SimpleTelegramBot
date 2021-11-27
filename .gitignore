@@ -1,0 +1,6 @@
+/vendor
+OLD_SYS
+.vscode/sftp.json
+.env
+composer.lock
+run.php

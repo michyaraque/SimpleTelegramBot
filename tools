@@ -1,0 +1,39 @@
+#!/usr/bin/env php
+<?php
+
+require_once dirname(__FILE__, 1) . "/vendor/autoload.php";
+
+use Libraries\Terminal;
+
+$terminal = Terminal::receive($argv, false);
+
+if (strtolower($terminal[0]) === 'tools') {
+    $parameter = explode(':', $terminal[1]);
+    switch ($parameter[0]) {
+        case 'log':
+            switch ($parameter[1] ?? null) {
+                case 'output':
+                    passthru('tail -f ' . dirname(__FILE__, 1) . '/storage/logs/output.log');
+                    break;
+                case 'input':
+                    passthru('tail -f ' . dirname(__FILE__, 1) . '/storage/logs/input.log');
+                    break;
+                case 'apache':
+                    passthru('tail -f /var/log/apache2/error.log');
+                    break;
+                default:
+                    echo "\n> Available commands\nlog:output\nlog:input\nlog:apache\n\nCommand unrecognized\n";
+            }
+        case 'migrate':
+            switch ($parameter[1] ?? null) {
+            }
+            break;
+        case 'cleanup-database':
+            $database = config('database');
+            shell_exec('mysql -u ' . $database['database_username'] . ' -p' . $database['database_password'] . ' -e "drop database if exists ' . $database['database_name'] . '"');
+            shell_exec('mysql -u ' . $database['database_username'] . ' -p' . $database['database_password'] . ' -e "create database ' . $database['database_name'] . '"');
+            shell_exec('mysql -u ' . $database['database_username'] . ' -p' . $database['database_password'] . ' ' . $database['database_name'] . ' < ' . dirname(__FILE__, 1) . '/database/schema.sql');
+            echo "\n¡Database creada!\n";
+        break;
+    }
+}
