@@ -177,7 +177,7 @@ trait KeyboardUtils {
             if(!empty($params->cmd)) {
 
                 $callback_commands = array_map(function($available_updates) {
-                    if(is_array($available_updates)) {
+                    if(is_array($available_updates) && key_exists('callback', $available_updates)) {
                         return $available_updates['callback'];
                     } else {
                         return $available_updates;
@@ -221,7 +221,11 @@ trait KeyboardUtils {
             $response = Updates::get();
             
             if(!empty($response->message->text)) {
-                if($response->message->entities[0]->type == 'bot_command' || $response->message->entities[1]->type == 'bot_command') {
+                
+                if(
+                    !empty($response->message->entities[0]) && $response->message->entities[0]->type == 'bot_command' || 
+                    !empty($response->message->entities[1]) && $response->message->entities[1]->type == 'bot_command'
+                    ) {
 
                     $text = $response->message->text;
 
@@ -239,6 +243,8 @@ trait KeyboardUtils {
                     $command = str_replace('/', '', $command);
                     
                     return (in_array($command[0], $string_commands) ? true : false);
+                } else {
+                    return (in_array($response->message->text, $string_commands) ? true : false);
                 }
             }
         }

@@ -111,13 +111,13 @@ class Component {
     public function getInitCommandArray(array $array, $needle): ?array {
         $iterator = new \RecursiveArrayIterator($array);
         $recursive = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::SELF_FIRST);
-        $return = [];
+        $content = [];
         foreach ($recursive as $key => $value) {
           if ($key === $needle) {
-            $return = ['method' => $iterator->key(), 'commands' => $value];
+            $content[] = ['method' => $iterator->key(), 'commands' => $value];
           }
         } 
-        return $return;
+        return $content;
     }
 
     /**
@@ -145,13 +145,12 @@ class Component {
                         */
                         
                         if(!empty($update)){
-
                             if(is_array($this->chaining['methods'][$method])) {
                                 $method_updated = $this->chaining['methods'][$method]['callback'];
                             } else {
                                 $method_updated = $this->chaining['methods'][$method];
                             }
-
+                            
                             if($method_updated === $update) {
                                 call_user_func("${class}::${method}");
                                 unset($this->chaining['methods']);
@@ -212,17 +211,26 @@ class Component {
      */
     private function initTextCommands(Component $instance, string $class): void {
         
-        if(is_array($instance->chaining['methods']) && !empty(Updates::text())){
-            $command = $this->getInitCommandArray($instance->chaining['methods'], 'commands');
-            if(!empty($command)) {
-                if(Client::checkStringCommandInArray($command['commands'])) {
-                    $method = $command['method'];
-                    if(!empty($instance->chaining['methods'][$method]['callback'])) {
-                        $update = $instance->chaining['methods'][$method]['callback'];
-                    } else {
-                        $update = 0;
+        if(
+            !empty($instance->chaining['methods']) && 
+            is_array($instance->chaining['methods']) && 
+            !empty(Updates::text())
+            ){
+            $commands = $this->getInitCommandArray($instance->chaining['methods'], 'commands');
+            if(!empty($commands)) { 
+                
+                foreach($commands as $command) {
+                    if(Client::checkStringCommandInArray($command['commands'])) {
+                        $method = $command['method'];
+                        
+                        if(!empty($instance->chaining['methods'][$method]['callback'])) {
+                            $update = $instance->chaining['methods'][$method]['callback'];
+                        } else {
+                            $update = null;
+                        }
+                        $instance->retrieveMethod($class, $method, $update);
+                        break;
                     }
-                    $instance->retrieveMethod($class, $method, $update);
                 }
             }
         }
@@ -243,7 +251,7 @@ class Component {
 
             $callback_command = Client::getCommandFromCallback();
             $method = array_search($callback_command, array_map(function($var) {
-                if(is_array($var)) {
+                if(is_array($var) && key_exists('callback', $var)) {
                     return $var['callback'];
                 } else {
                     return $var;
