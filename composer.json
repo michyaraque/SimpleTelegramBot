@@ -1,6 +1,6 @@
 {
-  "name": "michyaraque/telegram-component-api",
-  "description": "A complete Telegram bot API implementation written in PHP, with support for inline bots!",
+  "name": "michyaraque/simpletelegrambot",
+  "description": "A complete Telegram bot API implementation written in PHP, with support for inline bots and fully componetized!",
   "keywords": [
     "Telegram",
     "API",
@@ -10,7 +10,7 @@
     {
       "name": "Michael Araque",
       "email": "michyaraque@gmail.com",
-      "homepage": "https://github.com/telegram-component-api/contributors"
+      "homepage": "https://github.com/Simple-TelegramBot/contributors"
     }
   ],
   "require": {
